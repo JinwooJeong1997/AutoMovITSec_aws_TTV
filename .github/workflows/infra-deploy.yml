@@ -1,0 +1,27 @@
+﻿name: "Track A - Terraform Infrastructure Deploy"
+on:
+  push:
+    paths:
+      - 'terraform/**'
+    branches: [ main ]
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Format & Init
+        run: |
+          cd terraform
+          terraform fmt -check
+          terraform init
+
+      - name: Terraform Plan
+        run: |
+          cd terraform
+          terraform plan

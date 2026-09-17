@@ -1,0 +1,29 @@
+﻿name: "Track B - App DevSecOps & Deploy"
+on:
+  push:
+    paths:
+      - 'app/**'
+    branches: [ main ]
+
+jobs:
+  build-and-security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Docker Build
+        run: |
+          docker build -t target-app:latest ./app
+
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'target-app:latest'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+
+      # - name: OWASP ZAP Baseline Scan (DAST)
+      # - name: Push to Amazon ECR & Deploy to EC2
