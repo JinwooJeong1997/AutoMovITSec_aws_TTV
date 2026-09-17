@@ -1,0 +1,57 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "id": 1,
+      "title": "⚡ SOAR 원격 점검 및 리포트 제어기",
+      "type": "text",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "options": {
+        "mode": "html",
+        "content": "<style>\n  nav[aria-label=\"Search and navigation\"], [data-testid=\"nav-menu\"], [data-testid=\"help-menu-button\"] { display: none !important; }\n  .btn-action { padding: 6px 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; }\n</style>\n<div style=\"padding: 10px; background: #161b22; border: 1px solid #30363d; border-radius: 6px;\">\n  <div style=\"display: flex; gap: 8px; margin-bottom: 8px;\">\n    <select id=\"targetServer\" style=\"flex: 1; padding: 6px; background: #0d1117; color: #c9d1d9; border: 1px solid #30363d; border-radius: 4px; font-size: 12px;\">\n      <option value=\"EC2-Web-01 (10.0.1.10)\">EC2-Web-01 (10.0.1.10)</option>\n      <option value=\"EC2-Web-02 (10.0.1.20)\">EC2-Web-02 (10.0.1.20)</option>\n      <option value=\"EC2-Web-03 (10.0.1.30)\">EC2-Web-03 (10.0.1.30)</option>\n      <option value=\"ALL\">전체 웹 인스턴스 일괄 점검</option>\n    </select>\n    <button onclick=\"triggerLocalScan()\" class=\"btn-action\" style=\"background: #238636; color: #fff;\">점검 지시 하달</button>\n  </div>\n  <div id=\"scanConsole\" style=\"padding: 8px; background: #0d1117; border: 1px solid #21262d; border-radius: 4px; font-family: monospace; font-size: 11px; color: #8b949e; min-height: 48px;\">\n    상태: 대기 중\n  </div>\n  <div style=\"margin-top: 10px; border-top: 1px solid #30363d; padding-top: 8px; display: flex; align-items: center; gap: 8px;\">\n    <span style=\"font-size: 11px; color: #8b949e;\">문서화:</span>\n    <button onclick=\"exportLocalDoc('pdf')\" class=\"btn-action\" style=\"background: #da3633; color: white;\">📄 점검 보고서 (PDF)</button>\n    <button onclick=\"exportLocalDoc('csv')\" class=\"btn-action\" style=\"background: #30363d; color: #c9d1d9;\">📊 미흡항목 데이터 (CSV)</button>\n  </div>\n</div>\n<script>\nconst dummyData = [\n  ['U-01', 'root 계정 원격 접속 제한', '상', '양호', 'PermitRootLogin no 설정 완료'],\n  ['U-02', '패스워드 복잡성 설정', '상', '취약', '최소 길이 8자 미만 (현재 6자)'],\n  ['U-03', '계정 잠금 임계값 설정', '상', '취약', 'pam_faillock 임계값 누락'],\n  ['U-04', '패스워드 파일 보호', '상', '양호', '/etc/shadow 권한 000 만족']\n];\nfunction triggerLocalScan() {\n  const s = document.getElementById('targetServer').value;\n  const box = document.getElementById('scanConsole');\n  box.innerText = `[${new Date().toLocaleTimeString()}] [${s}] AWS SSM Run Command 호출 전송 중...`;\n  setTimeout(() => {\n    box.innerHTML = `<span style=\"color:#3fb950;\">[성공]</span> [${s}] KISA 진단 스크립트 실행 완료 (Command ID: ssm-${Math.floor(Math.random()*90000+10000)})`;\n  }, 800);\n}\nfunction exportLocalDoc(type) {\n  const s = document.getElementById('targetServer').value;\n  if (type === 'csv') {\n    let csv = '\\uFEFF점검코드,점검항목명,중요도,진단결과,상세내역\\n' + dummyData.map(r => r.join(',')).join('\\n');\n    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });\n    const a = document.createElement('a');\n    a.href = URL.createObjectURL(blob);\n    a.download = `${s}_KISA_Report.csv`;\n    a.click();\n  } else {\n    const w = window.open('', '_blank');\n    w.document.write(`<html><head><title>${s} KISA 점검 보고서</title><style>body{font-family:sans-serif;margin:30px;color:#333;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #ccc;padding:8px;text-align:left;}th{background:#f0f0f0;}.fail{color:red;font-weight:bold;}.btn{padding:8px 16px;background:#2b5797;color:#fff;border:none;cursor:pointer;}@media print{.btn{display:none;}}</style></head><body><button class=\"btn\" onclick=\"window.print()\">📄 PDF 저장 / 인쇄</button><h2>KISA 정보보안 분석·평가 결과서</h2><p><b>대상:</b> ${s} | <b>일시:</b> ${new Date().toLocaleString()}</p><table><thead><tr><th>코드</th><th>항목명</th><th>중요도</th><th>결과</th><th>세부내역</th></tr></thead><tbody>${dummyData.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td class=\"${r[3]==='취약'?'fail':''}\">${r[3]}</td><td>${r[4]}</td></tr>`).join('')}</tbody></table></body></html>`);\n    w.document.close();\n  }\n}\n</script>"
+      }
+    },
+    {
+      "id": 2,
+      "title": "CI/CD 보안 게이트 현황 (Trivy & ZAP)",
+      "type": "text",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "options": {
+        "mode": "html",
+        "content": "<div style=\"display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 5px;\">\n  <div style=\"background: #161b22; border: 1px solid #30363d; padding: 12px; border-radius: 6px;\">\n    <h4 style=\"margin: 0 0 8px 0; color: #58a6ff;\">Trivy Image Scan</h4>\n    <div style=\"font-size: 12px; line-height: 1.8;\">\n      • 대상: <code style=\"color: #f0883e;\">app:v1.4.2</code><br>\n      • 취약점: CRITICAL 0 / HIGH 2<br>\n      • 판정: <span style=\"color: #3fb950; font-weight: bold;\">PASSED (게이트 통과)</span>\n    </div>\n  </div>\n  <div style=\"background: #161b22; border: 1px solid #30363d; padding: 12px; border-radius: 6px;\">\n    <h4 style=\"margin: 0 0 8px 0; color: #58a6ff;\">OWASP ZAP Baseline</h4>\n    <div style=\"font-size: 12px; line-height: 1.8;\">\n      • DAST 스캔: PASS (2분 40초)<br>\n      • 검출: X-Frame-Options 경고<br>\n      • 판정: <span style=\"color: #3fb950; font-weight: bold;\">통과 (ECR Push 승인)</span>\n    </div>\n  </div>\n</div>"
+      }
+    },
+    {
+      "id": 3,
+      "title": "실시간 보안 위협 및 비정상 접근 로그 (SIEM / OpenSearch)",
+      "type": "text",
+      "gridPos": { "h": 8, "w": 14, "x": 0, "y": 8 },
+      "options": {
+        "mode": "html",
+        "content": "<table style=\"width:100%; font-size: 12px; border-collapse: collapse; text-align: left;\">\n  <thead>\n    <tr style=\"border-bottom: 1px solid #30363d; color: #8b949e;\">\n      <th style=\"padding: 8px;\">시간</th><th>이벤트 출처</th><th>위협 분류</th><th>출발지 IP</th><th>심각도</th><th>조치</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr style=\"border-bottom: 1px solid #21262d;\"><td style=\"padding: 8px;\">11:04:12</td><td>CloudWatch (Nginx)</td><td>SQL Injection 시도 (' OR 1=1)</td><td>198.51.100.44</td><td><span style=\"color: #f85149; font-weight: bold;\">CRITICAL</span></td><td>WAF 403 차단</td></tr>\n    <tr style=\"border-bottom: 1px solid #21262d;\"><td style=\"padding: 8px;\">11:02:50</td><td>VPC Flow Logs</td><td>SSH Brute-Force 탐지</td><td>203.0.113.12</td><td><span style=\"color: #f0883e; font-weight: bold;\">HIGH</span></td><td>보안그룹 격리</td></tr>\n    <tr style=\"border-bottom: 1px solid #21262d;\"><td style=\"padding: 8px;\">10:58:33</td><td>GuardDuty</td><td>Recon:IAMUser/MaliciousIP</td><td>192.0.2.78</td><td><span style=\"color: #d29922; font-weight: bold;\">MEDIUM</span></td><td>SQS 큐 인입</td></tr>\n  </tbody>\n</table>"
+      }
+    },
+    {
+      "id": 4,
+      "title": "호스트 KISA 컴플라이언스 미흡 항목 현황",
+      "type": "text",
+      "gridPos": { "h": 8, "w": 10, "x": 14, "y": 8 },
+      "options": {
+        "mode": "html",
+        "content": "<div style=\"font-size: 12px; padding: 6px;\">\n  <div style=\"margin-bottom: 12px; border-left: 3px solid #f85149; padding-left: 10px;\">\n    <strong style=\"color: #f85149;\">[U-02] 패스워드 복잡성 미흡 (상)</strong><br>\n    <span style=\"color: #8b949e;\">EC2-Web-01, 02 /etc/security/pwquality.conf 미설정</span>\n  </div>\n  <div style=\"margin-bottom: 12px; border-left: 3px solid #f85149; padding-left: 10px;\">\n    <strong style=\"color: #f85149;\">[U-03] 계정 잠금 임계값 미설정 (상)</strong><br>\n    <span style=\"color: #8b949e;\">EC2-Web-01 로그인 5회 실패 시 차단 룰 부재</span>\n  </div>\n  <div style=\"border-left: 3px solid #3fb950; padding-left: 10px;\">\n    <strong style=\"color: #3fb950;\">[U-01] root 원격 접속 차단 (상)</strong><br>\n    <span style=\"color: #8b949e;\">전체 웹서버 sshd_config PermitRootLogin 양호</span>\n  </div>\n</div>"
+      }
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["security", "soar"],
+  "time": { "from": "now-1h", "to": "now" },
+  "timezone": "browser",
+  "title": "Cloud Security SOAR & DevSecOps Console",
+  "uid": "soar-dashboard"
+}   

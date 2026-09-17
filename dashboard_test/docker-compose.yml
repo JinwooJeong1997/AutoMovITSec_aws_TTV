@@ -1,0 +1,53 @@
+services:
+  # 1. OpenSearch (로그 & 취약점 JSON 저장소)
+  opensearch:
+    image: opensearchproject/opensearch:2.13.0
+    container_name: local-opensearch
+    environment:
+      - discovery.type=single-node
+      - plugins.security.disabled=true # 로컬 테스트 편의를 위해 보안 인증(SSL/인증서) 일시 비활성화
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # 로컬 메모리 제한 (512MB)
+    ports:
+      - "9200:9200"
+    networks:
+      - monitoring-net
+
+  # 2. Prometheus (시계열 메트릭 수집 및 알림 엔진)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: local-prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring-net
+
+  # 3. Grafana (통합 관제 대시보드)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: local-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_PANELS_DISABLE_SANITIZE_HTML=true # 대시보드 내 커스텀 HTML/버튼 사용 허용
+      # --- 불필요한 기능 비활성화 추가 영역 ---
+      - GF_ALERTING_ENABLED=false # 구형 Alerting 메뉴 제거
+      - GF_UNIFIED_ALERTING_ENABLED=false # 통합 Alerting 엔진/메뉴 제거
+      - GF_EXPLORE_ENABLED=false # Explore 메뉴 제거
+      - GF_USERS_ALLOW_SIGN_UP=false # 자체 회원가입 기능 차단
+      - GF_USERS_ALLOW_ORG_CREATE=false # 조직 생성 차단
+      - GF_HELP_ENABLED=false # 도움말 메뉴 제거
+      - GF_ANALYTICS_REPORTING_ENABLED=false # 텔레메트리 보고 차단
+      - GF_ANALYTICS_CHECK_FOR_UPDATES=false # 업데이트 확인 차단
+    depends_on:
+      - prometheus
+      - opensearch
+    networks:
+      - monitoring-net
+
+networks:
+  monitoring-net:
+    driver: bridge

@@ -1,6 +1,4 @@
 ﻿# Local test dashboards
-dashboard_test/
-/dashboard_test/
 
 # Terraform
 **/.terraform/

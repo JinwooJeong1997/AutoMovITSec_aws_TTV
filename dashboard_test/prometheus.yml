@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 5s # 테스트용 빠른 갱신 주기
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # 추후 타깃 웹서버의 Node Exporter가 생기면 여기에 추가
+  # - job_name: "web-servers"
+  #   static_configs:
+  #     - targets: ["host.docker.internal:9100"]
+
