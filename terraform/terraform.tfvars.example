@@ -1,0 +1,28 @@
+# =============================================================================
+# terraform.tfvars 샘플 — 이 파일을 복사해서 terraform.tfvars로 저장 후 값 채우기
+#  cp terraform.tfvars.example terraform.tfvars
+#
+# terraform.tfvars 자체는 .gitignore 대상이라 GitHub에 올라가지 않습니다.
+# (개인/팀 계정별 값이 다르므로 커밋하지 않음)
+# =============================================================================
+
+project_name = "automovitsec"
+region       = "ap-northeast-2"
+
+# Grafana(3000) 접근을 허용할 팀원 공인 IP. 비워두면 SSM 포트 포워딩으로만 접속
+admin_cidrs = []
+
+# 웹서버 대수 (초반 검증 단계 1대 → 검증 후 3으로)
+web_desired_capacity = 1
+web_min_size          = 1
+web_max_size          = 3
+
+# 비용 절감을 위해 연습 단계에서는 꺼도 됨
+enable_flow_logs = true
+
+# DB 계층 (RDS for MySQL)
+db_instance_class = "db.t3.micro"
+db_name           = "appdb"
+
+# 업로드 버킷: 실습 중 destroy가 잦으므로 기본 true. 운영 전환 시 false로 변경
+uploads_bucket_force_destroy = true

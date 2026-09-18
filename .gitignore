@@ -1,22 +1,23 @@
 ﻿# Local test dashboards
 
 # Terraform
-#**/.terraform/
-#*.tfstate
-#*.tfstate.*
-#crash.log
-#*.tfvars
-#*.tfvars.json
-#override.tf
-#override.tf.json
-#*_override.tf
-#*_override.tf.json
-#.terraform.lock.hcl
+**/.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+# .terraform.lock.hcl는 커밋함 (provider 버전 고정 — 공급망 공격 대비, HashiCorp 권장)
 
 # Environment & Secrets
-#.env
-#*.pem
-#*.key
+.env
+*.pem
+*.key
 
 # Docker & Logs
-#*.log
+*.log

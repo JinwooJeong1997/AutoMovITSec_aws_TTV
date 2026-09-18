@@ -1,0 +1,5 @@
+# .tf 파일은 로컬 OS(Windows autocrlf)와 무관하게 저장소에는 항상 LF로 저장
+# (CLAUDE.md 작업 규칙: ".tf 파일은 BOM 없이 UTF-8, 줄바꿈은 LF로 저장")
+*.tf text eol=lf
+*.tfvars text eol=lf
+*.sh text eol=lf
