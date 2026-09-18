@@ -1,0 +1,425 @@
+{
+  "uid": "integrated-web",
+  "title": "웹 서비스 통합 관제",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": false,
+  "refresh": "1m",
+  "timezone": "browser",
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "선택 조건 · 최근 5분 요청",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 8,
+        "h": 4
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(count_over_time({job=\"web-access\",server=~`^${server:regex}$`} | json | __error__=\"\" | ip =~ `^${ip:regex}$` | path =~ `^${path:regex}$` | status =~ `^${status:regex}$` | event_type =~ `^${event:regex}$`[5m]))",
+          "queryType": "instant",
+          "legendFormat": "{{server}}",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "선택 조건 · 최근 5분 4xx",
+      "type": "stat",
+      "gridPos": {
+        "x": 8,
+        "y": 0,
+        "w": 8,
+        "h": 4
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(count_over_time({job=\"web-access\",server=~`^${server:regex}$`} | json | __error__=\"\" | ip =~ `^${ip:regex}$` | path =~ `^${path:regex}$` | status =~ `^${status:regex}$` | event_type =~ `^${event:regex}$` | status >= 400 | status < 500 [5m])) or vector(0)",
+          "queryType": "instant",
+          "legendFormat": "{{server}}",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "선택 조건 · 최근 5분 5xx",
+      "type": "stat",
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 8,
+        "h": 4
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(count_over_time({job=\"web-access\",server=~`^${server:regex}$`} | json | __error__=\"\" | ip =~ `^${ip:regex}$` | path =~ `^${path:regex}$` | status =~ `^${status:regex}$` | event_type =~ `^${event:regex}$` | status >= 500 | status < 600 [5m])) or vector(0)",
+          "queryType": "instant",
+          "legendFormat": "{{server}}",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "서버별 요청률",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (server) (rate({job=\"web-access\",server=~`^${server:regex}$`} | json | __error__=\"\" | ip =~ `^${ip:regex}$` | path =~ `^${path:regex}$` | status =~ `^${status:regex}$` | event_type =~ `^${event:regex}$`[1m]))",
+          "queryType": "range",
+          "legendFormat": "{{server}}",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 5,
+      "title": "p95 응답시간",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "quantile_over_time(0.95, {job=\"web-access\",server=~`^${server:regex}$`} | json | __error__=\"\" | ip =~ `^${ip:regex}$` | path =~ `^${path:regex}$` | status =~ `^${status:regex}$` | event_type =~ `^${event:regex}$` | unwrap request_time | __error__=\"\" [5m]) by (server)",
+          "queryType": "range",
+          "legendFormat": "{{server}}",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 6,
+      "title": "상태 코드별 요청",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (status) (count_over_time({job=\"web-access\",server=~`^${server:regex}$`} | json | __error__=\"\" | ip =~ `^${ip:regex}$` | path =~ `^${path:regex}$` | status =~ `^${status:regex}$` | event_type =~ `^${event:regex}$`[5m]))",
+          "queryType": "range",
+          "legendFormat": "HTTP {{status}}",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 7,
+      "title": "IP별 요청 Top 5",
+      "type": "bargauge",
+      "gridPos": {
+        "x": 12,
+        "y": 12,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "topk(5, sum by (ip) (count_over_time({job=\"web-access\",server=~`^${server:regex}$`} | json | __error__=\"\" | ip =~ `^${ip:regex}$` | path =~ `^${path:regex}$` | status =~ `^${status:regex}$` | event_type =~ `^${event:regex}$`[$__range])))",
+          "queryType": "instant",
+          "legendFormat": "{{ip}}",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 8,
+      "title": "선택 조건 · 원본 로그",
+      "type": "logs",
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 24,
+        "h": 10
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{job=\"web-access\",server=~`^${server:regex}$`} | json | __error__=\"\" | ip =~ `^${ip:regex}$` | path =~ `^${path:regex}$` | status =~ `^${status:regex}$` | event_type =~ `^${event:regex}$`",
+          "queryType": "range",
+          "legendFormat": "{{server}}",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "sortOrder": "Descending",
+        "enableLogDetails": true
+      }
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "server",
+        "label": "서버",
+        "type": "custom",
+        "query": "",
+        "hide": 2,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "options": [
+          {
+            "text": "All",
+            "value": "$__all",
+            "selected": true
+          }
+        ]
+      },
+      {
+        "name": "ip",
+        "label": "IP",
+        "type": "custom",
+        "query": "",
+        "hide": 2,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "options": [
+          {
+            "text": "All",
+            "value": "$__all",
+            "selected": true
+          }
+        ]
+      },
+      {
+        "name": "path",
+        "label": "경로",
+        "type": "custom",
+        "query": "",
+        "hide": 2,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "options": [
+          {
+            "text": "All",
+            "value": "$__all",
+            "selected": true
+          }
+        ]
+      },
+      {
+        "name": "status",
+        "label": "상태 코드",
+        "type": "custom",
+        "query": "",
+        "hide": 2,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "options": [
+          {
+            "text": "All",
+            "value": "$__all",
+            "selected": true
+          }
+        ]
+      },
+      {
+        "name": "event",
+        "label": "이벤트",
+        "type": "custom",
+        "query": "",
+        "hide": 2,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "options": [
+          {
+            "text": "All",
+            "value": "$__all",
+            "selected": true
+          }
+        ]
+      }
+    ]
+  }
+}

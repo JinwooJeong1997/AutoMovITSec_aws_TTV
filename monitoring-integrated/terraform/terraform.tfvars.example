@@ -1,0 +1,16 @@
+aws_region = "ap-northeast-2"
+vpc_id = "vpc-REPLACE"
+subnet_id = "subnet-REPLACE"
+key_name = "existing-key"
+admin_cidr = "203.0.113.10/32" # 실제 관리자 IP
+queue_name = "web-log-queue"
+instance_type = "t3.medium"
+data_disk_gb = 40
+# ami_id = "ami-REPLACE" # 최초 검증한 Ubuntu 24.04 amd64 AMI 고정 권장
+# AI 사용 시 계정에서 접근 가능한 Converse 지원 모델을 지정합니다.
+bedrock_model_id = ""
+bedrock_resource_arns = []
+# 예: 모델 ID/추론 프로파일과 그에 필요한 정확한 ARN들을 함께 입력
+# sqs_kms_key_arn = "arn:aws:kms:ap-northeast-2:123456789012:key/..."
+
+enable_cloudwatch_datasource = false
