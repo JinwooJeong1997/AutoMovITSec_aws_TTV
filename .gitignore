@@ -1,22 +1,22 @@
 ﻿# Local test dashboards
 
 # Terraform
-**/.terraform/
-*.tfstate
-*.tfstate.*
-crash.log
-*.tfvars
-*.tfvars.json
-override.tf
-override.tf.json
-*_override.tf
-*_override.tf.json
-.terraform.lock.hcl
+#**/.terraform/
+#*.tfstate
+#*.tfstate.*
+#crash.log
+#*.tfvars
+#*.tfvars.json
+#override.tf
+#override.tf.json
+#*_override.tf
+#*_override.tf.json
+#.terraform.lock.hcl
 
 # Environment & Secrets
-.env
-*.pem
-*.key
+#.env
+#*.pem
+#*.key
 
 # Docker & Logs
-*.log
+#*.log
