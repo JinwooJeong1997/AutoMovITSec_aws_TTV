@@ -11,7 +11,7 @@ Shift-Left 보안(배포 전 차단)과 중앙 관제(운영 중 탐지)를 결�
 | `monitoring/` | 노혜린 · 이승훈 (대시보드/파이프라인) | Loki + Grafana + SQS 워커 (Docker Compose 기반 관제 스택) | `terraform` output의 `flow_log_group_name`, `monitoring_sg_id`. **인프라 담당자가 임의로 수정하지 않음** |
 | `.github/workflows/` | 정진우 (PM) | CI/CD 파이프라인 정의 | 아래 "CI/CD 동작 방식" 참고 |
 
-`terraform/monitoring_infra.tf`는 모니터링 파이프라인(SQS 버퍼 큐, EventBridge, S3 Cold Storage)용 인프라 코드 자리이며, 담당자가 정해지면 채웁니다. 서브넷/보안 그룹(`monitoring_sg_id`)은 이미 `terraform/main.tf`에 준비되어 있으니 새로 만들지 말고 참조하세요.
+`terraform/monitoring_infra.tf`는 모니터링 파이프라인(SQS 버퍼 큐, EventBridge, S3 Cold Storage)용 인프라 코드 자리입니다. 노혜린 · 이승훈이 채울 예정이며, 자세한 작업 가이드는 아래 "모니터링 파이프라인 작업 가이드" 섹션과 해당 파일 상단 주석을 참고하세요.
 
 ## 작업 규칙 (공통)
 
@@ -65,3 +65,14 @@ Shift-Left 보안(배포 전 차단)과 중앙 관제(운영 중 탐지)를 결�
 ### 아직 보류 중인 것 (CLAUDE.md 참고)
 - Nginx `realip` 설정, Node Exporter/cAdvisor 유지 여부 — 메트릭 경로 재검토 후 결정
 - tfstate 원격 백엔드, GitHub Actions OIDC 역할 — 담당자 미정
+
+## 모니터링 파이프라인 작업 가이드 (노혜린 · 이승훈)
+
+`terraform/monitoring_infra.tf`(SQS 버퍼 큐 · EventBridge · S3 Cold Storage · 모니터링 EC2)를 채울 때 참고할 것. **전체 상세 내용은 `terraform/monitoring_infra.tf` 파일 상단 주석에 있으니 코드 작성 전 반드시 먼저 읽어보세요.** 요약:
+
+- **State 공유 문제 (가장 먼저 확인)**: `backend.tf`가 아직 로컬 state라 `terraform.tfstate`가 문희재 개인 PC에만 있습니다. 원격 백엔드(S3)가 준비되기 전까지 각자 PC에서 `terraform apply`를 돌리면 기존 VPC/ALB/RDS를 중복 생성하려 할 수 있으니, 코드/PR까지만 진행하고 apply는 문희재에게 요청하세요.
+- **재사용할 기존 리소스** (같은 `terraform/` state이므로 데이터 소스 없이 바로 참조): `aws_vpc.main`, `aws_subnet.private[*]`(모니터링 서버 배치), `aws_security_group.monitoring`(웹서버 9100/8080·Grafana 3000 규칙 이미 포함), `aws_cloudwatch_log_group.flow_logs[0]`, 웹 인스턴스의 `Role = "web"` 태그, SSM 네임스페이스 `/automovitsec/...`
+- **SQS 메시지 스키마**: `monitoring/sqs-worker/worker.py`가 기대하는 형식에 맞춰 Lambda(구독 필터 대상)를 구현해야 함 — `{"logGroup", "logStream", "timestamp", "message"}`
+- **모니터링 EC2 IAM 역할은 신규 작성**: `terraform/iam.tf`의 웹 역할과 같은 최소 권한 패턴으로 (SQS 수신/삭제, CloudWatch PutMetricData, S3 Cold Storage, Athena, EC2 Describe, SSM — SSH는 열지 않음)
+- **결정 필요**: Node Exporter/cAdvisor 존치 여부 (CloudWatch Metrics API 전환 검토 중) — 정해지면 문희재에게 공유
+- **선행 버그 수정 필요**: `monitoring/docker-compose.yml`의 `generator` 서비스가 참조하는 `./generator` 폴더가 레포에 없어 로컬 `docker compose up`이 실패함

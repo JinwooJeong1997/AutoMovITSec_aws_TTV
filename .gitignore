@@ -13,6 +13,8 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 # .terraform.lock.hcl는 커밋함 (provider 버전 고정 — 공급망 공격 대비, HashiCorp 권장)
+tfplan
+*.tfplan
 
 # Environment & Secrets
 .env
